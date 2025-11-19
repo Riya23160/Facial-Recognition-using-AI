@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criminal Identification System</title>
+<style>
+/* Body & fonts */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #ece9e6, #ffffff);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header */
+h2 {
+    color: #222;
+    margin-bottom: 25px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* File input + button wrapper */
+#uploadControls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+input[type=file] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 25px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Container for image + result */
+#container {
+    display: flex;
+    gap: 30px;
+    width: 90%;
+    max-width: 1000px;
+    justify-content: center;
+    align-items: stretch; /* equal height */
+    flex-wrap: wrap;
+}
+
+/* Image preview */
+#preview {
+    max-width: 400px;
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    object-fit: cover;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* Result card */
+#result {
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    flex: 1; /* expand to match image height */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    white-space: pre-wrap;
+    overflow: auto;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Highlight key labels */
+strong {
+    color: #007bff;
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+    #container {
+        flex-direction: column;
+        align-items: center;
+    }
+    #preview {
+        margin-bottom: 20px;
+    }
+    #uploadControls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+</head>
+<body>
+
+<h2>Criminal Identification System</h2>
+
+<div id="uploadControls">
+    <input type="file" id="img" accept="image/*">
+    <button id="identifyBtn">Identify</button>
+</div>
+
+<div id="container">
+    <img id="preview" src="" alt="Image Preview" style="display:none;">
+    <div id="result">
+        <div id="resultContent"></div>
+    </div>
+</div>
+
+<script>
+const fileInput = document.getElementById("img");
+const previewImg = document.getElementById("preview");
+const identifyBtn = document.getElementById("identifyBtn");
+const resultContent = document.getElementById("resultContent");
+let selectedFile = null;
+
+// Image preview
+fileInput.addEventListener('change', () => {
+    if(fileInput.files.length > 0){
+        selectedFile = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewImg.style.display = "block";
+        };
+        reader.readAsDataURL(selectedFile);
+    }
+});
+
+// Send image to backend
+identifyBtn.addEventListener('click', async () => {
+    if(!selectedFile){
+        alert("Please select an image first!");
+        return;
+    }
+
+    resultContent.innerHTML = "Scanning... Please wait.";
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+
+    try {
+        const res = await fetch("/identify", { method:"POST", body:formData });
+        const data = await res.json();
+
+        if(data.status === "Match Found"){
+            let formatted = data.message
+                .replace(/^Person Identified/m, "<h3 style='color:#007bff;'>Person Identified</h3>")
+                .replace(/^Name:/m, "<strong>Name:</strong>")
+                .replace(/^Age:/m, "<strong>Age:</strong>")
+                .replace(/^Gender:/m, "<strong>Gender:</strong>")
+                .replace(/^Crimes:/m, "<strong>Crimes:</strong>")
+                .replace(/^Status:/m, "<strong>Status:</strong>")
+                .replace(/^Last Address:/m, "<strong>Last Address:</strong>")
+                .replace(/^Release Date:/m, "<strong>Release Date:</strong>");
+
+            resultContent.innerHTML = formatted;
+        } else {
+            resultContent.innerText = data.message || data.status || "Unknown response";
+        }
+
+    } catch(err){
+        resultContent.innerText = "Error: " + err.message;
+    }
+});
+</script>
+
+</body>
+</html>
