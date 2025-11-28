@@ -5,184 +5,207 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Criminal Identification System</title>
 <style>
-/* Body & fonts */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #ece9e6, #ffffff);
-    margin: 0;
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Header */
-h2 {
-    color: #222;
-    margin-bottom: 25px;
-    text-align: center;
-    letter-spacing: 1px;
-}
-
-/* File input + button wrapper */
-#uploadControls {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-}
-
-input[type=file] {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-button {
-    padding: 10px 25px;
-    font-size: 16px;
-    cursor: pointer;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: #0056b3;
-}
-
-/* Container for image + result */
-#container {
-    display: flex;
-    gap: 30px;
-    width: 90%;
-    max-width: 1000px;
-    justify-content: center;
-    align-items: stretch; /* equal height */
-    flex-wrap: wrap;
-}
-
-/* Image preview */
-#preview {
-    max-width: 400px;
-    width: 100%;
-    border-radius: 10px;
-    border: 2px solid #ccc;
-    object-fit: cover;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-}
-
-/* Result card */
-#result {
-    background: #fff;
-    padding: 25px 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    flex: 1; /* expand to match image height */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    white-space: pre-wrap;
-    overflow: auto;
-    font-size: 16px;
-    line-height: 1.6;
-}
-
-/* Highlight key labels */
-strong {
-    color: #007bff;
-}
-
-/* Responsive tweaks */
-@media (max-width: 900px) {
-    #container {
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #ece9e6, #ffffff);
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
         flex-direction: column;
         align-items: center;
     }
-    #preview {
+
+    h2 {
+        color: #222;
+        margin-bottom: 25px;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+
+    /* Tab Buttons */
+    .tab-btns {
+        display: flex;
+        margin-bottom: 30px;
+        gap: 10px;
+    }
+
+    .tab-btn {
+        padding: 10px 25px;
+        border: none;
+        background: #6c757d;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .tab-btn.active {
+        background: #007bff;
+    }
+
+    .tab-btn:hover {
+        background: #0056b3;
+    }
+
+    /* Tab Content */
+    .tab-content {
+        display: none;
+        width: 90%;
+        max-width: 1000px;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Shared styles */
+    input[type=file], input[type=text], textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .file-controls, .update-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
         margin-bottom: 20px;
     }
-    #uploadControls {
-        flex-direction: column;
-        align-items: stretch;
+
+    button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
     }
-}
+
+    button:hover {
+        background: #0056b3;
+    }
+
+    #preview, #updatePreview {
+        max-width: 350px;
+        display: none;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    #result {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        white-space: pre-wrap;
+    }
 </style>
 </head>
 <body>
 
 <h2>Criminal Identification System</h2>
 
-<div id="uploadControls">
-    <input type="file" id="img" accept="image/*">
-    <button id="identifyBtn">Identify</button>
+<!-- Tabs -->
+<div class="tab-btns">
+    <button class="tab-btn active" data-tab="identify">Identify</button>
+    <button class="tab-btn" data-tab="update">Update</button>
 </div>
 
-<div id="container">
-    <img id="preview" src="" alt="Image Preview" style="display:none;">
-    <div id="result">
-        <div id="resultContent"></div>
+<!-- Identification Section -->
+<div id="identify" class="tab-content active">
+    <div class="file-controls">
+        <input type="file" id="img" accept="image/*">
+        <button id="identifyBtn">Identify</button>
     </div>
+    <img id="preview" />
+    <div id="result"><div id="resultContent"></div></div>
+</div>
+
+<!-- Updating Section -->
+<div id="update" class="tab-content">
+    <div class="file-controls">
+        <input type="file" id="updateImg" accept="image/*">
+        <img id="updatePreview" />
+    </div>
+    <input type="text" id="name" placeholder="Name">
+    <input type="text" id="age" placeholder="Age">
+    <input type="text" id="gender" placeholder="Gender">
+    <textarea id="crimes" placeholder="Crimes"></textarea>
+    <input type="text" id="status" placeholder="Status">
+    <input type="text" id="address" placeholder="Last Address">
+    <input type="text" id="releaseDate" placeholder="Release Date">
+    <button id="updateBtn">Save to Database</button>
 </div>
 
 <script>
-const fileInput = document.getElementById("img");
-const previewImg = document.getElementById("preview");
-const identifyBtn = document.getElementById("identifyBtn");
-const resultContent = document.getElementById("resultContent");
-let selectedFile = null;
+    // Tab switching
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab).classList.add("active");
+        });
+    });
 
-// Image preview
-fileInput.addEventListener('change', () => {
-    if(fileInput.files.length > 0){
+    // Identify Logic
+    const fileInput = document.getElementById("img");
+    const previewImg = document.getElementById("preview");
+    const identifyBtn = document.getElementById("identifyBtn");
+    const resultContent = document.getElementById("resultContent");
+    let selectedFile = null;
+
+    fileInput.addEventListener('change', () => {
         selectedFile = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            previewImg.src = e.target.result;
-            previewImg.style.display = "block";
-        };
-        reader.readAsDataURL(selectedFile);
-    }
-});
+        previewImg.src = URL.createObjectURL(selectedFile);
+        previewImg.style.display = "block";
+    });
 
-// Send image to backend
-identifyBtn.addEventListener('click', async () => {
-    if(!selectedFile){
-        alert("Please select an image first!");
-        return;
-    }
+    identifyBtn.addEventListener('click', async () => {
+        if(!selectedFile) return alert("Select an image!");
+        resultContent.innerHTML = "Scanning...";
+        let formData = new FormData();
+        formData.append("image", selectedFile);
 
-    resultContent.innerHTML = "Scanning... Please wait.";
-
-    const formData = new FormData();
-    formData.append("image", selectedFile);
-
-    try {
-        const res = await fetch("/identify", { method:"POST", body:formData });
+        const res = await fetch("/identify", { method: "POST", body: formData });
         const data = await res.json();
+        resultContent.innerText = data.message;
+    });
 
-        if(data.status === "Match Found"){
-            let formatted = data.message
-                .replace(/^Person Identified/m, "<h3 style='color:#007bff;'>Person Identified</h3>")
-                .replace(/^Name:/m, "<strong>Name:</strong>")
-                .replace(/^Age:/m, "<strong>Age:</strong>")
-                .replace(/^Gender:/m, "<strong>Gender:</strong>")
-                .replace(/^Crimes:/m, "<strong>Crimes:</strong>")
-                .replace(/^Status:/m, "<strong>Status:</strong>")
-                .replace(/^Last Address:/m, "<strong>Last Address:</strong>")
-                .replace(/^Release Date:/m, "<strong>Release Date:</strong>");
+    // Update Logic
+    const updateImgInput = document.getElementById("updateImg");
+    const updatePreview = document.getElementById("updatePreview");
+    let updateFile = null;
 
-            resultContent.innerHTML = formatted;
-        } else {
-            resultContent.innerText = data.message || data.status || "Unknown response";
-        }
+    updateImgInput.addEventListener('change', () => {
+        updateFile = updateImgInput.files[0];
+        updatePreview.src = URL.createObjectURL(updateFile);
+        updatePreview.style.display = "block";
+    });
 
-    } catch(err){
-        resultContent.innerText = "Error: " + err.message;
-    }
-});
+    document.getElementById("updateBtn").addEventListener('click', async () => {
+        if (!updateFile) return alert("Please select an image for updating!");
+        let confirmed = confirm("Are you sure you want to save this criminal information?");
+        if (!confirmed) return;
+
+        let formData = new FormData();
+        formData.append("image", updateFile);
+        formData.append("name", document.getElementById("name").value);
+        formData.append("age", document.getElementById("age").value);
+        formData.append("gender", document.getElementById("gender").value);
+        formData.append("crimes", document.getElementById("crimes").value);
+        formData.append("status", document.getElementById("status").value);
+        formData.append("address", document.getElementById("address").value);
+        formData.append("releaseDate", document.getElementById("releaseDate").value);
+
+        const res = await fetch("/update", { method: "POST", body: formData });
+        const data = await res.json();
+        alert(data.message);
+    });
 </script>
 
 </body>
